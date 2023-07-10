@@ -4,8 +4,7 @@
     And then puting in the time, effort & pracitce and not giving up when things get difficult.
 */
 
-// source :  https://codeforces.com/edu/course/2/lesson/7/1/practice/contest/289390/problem/C
-
+// source : https://codeforces.com/edu/course/2/lesson/7/1/practice/contest/289390/problem/D
 
 #include <bits/stdc++.h>
 using namespace std;
@@ -44,79 +43,74 @@ void allUpper(string &s) {
 } 
 
 class DSU {
-public:
-	vector<int> parent, rank, exp;
+	public :
+	vector<int> parent, rank;
 	DSU(int v) {
 		parent.resize(v);
-		rank.resize(v);
-		exp.resize(v);
-		for(int i = 0; i < v; i++) {
-			parent[i] = i;
-			rank[i] = exp[i] = 0;
-		}
+		iota(parent.begin(), parent.end(), 0);
+		rank.resize(v, 0);
 	}
-	pair<int,int> find(int x) {
-		if(x == parent[x]) return {x, exp[x]};
-
-		auto p = find(parent[x]);
-		
-		int leader = p.first;
-		parent[x] = leader;
-
-		int ex = exp[x];
-		ex = p.second - exp[leader] + exp[x];
-		exp[x] = ex;
-
-		return {leader , exp[x] + exp[leader]};
+	int find(int a) {
+		return parent[a] = (a == parent[a] ? a : find(parent[a]));
 	}
-
 	void merge(int a, int b) {
-		a = find(a).first;
-		b = find(b).first;
+		a = find(a);
+		b = find(b);
 		if(a == b) return;
 		if(rank[a] == rank[b]) rank[a]++;
 		if(rank[a] < rank[b]) swap(a, b);
 		parent[b] = a;
-		exp[b] = exp[b] - exp[a]; 
-
-	}
-	
-	void add(int a, int c) {
-		a = find(a).first;
-		exp[a] += c;
 	}
 };
 
 /*
-		INPUT :					OUTPUT : 
-		3 6 				
-	add 1 100
-	join 1 3
-	add 1 50
-	get 1 						150
-	get 2 						0
-	get 3 						50
-
+		INPUT : 					OUTPUT :
+		
+		3 3 7 						YES
+		1 2 						YES
+		2 3 						NO
+		3 1 						No
+		ask 3 3
+		cut 1 2
+		ask 1 2
+		cut 1 3
+		ask 2 1
+		cut 2 3
+		ask 3 1
+		
 */
 
 
 void sol () {
-	int n, m;
-	cin >> n >> m;
+	int n,m,k; cin >> n >> m >> k;
+	int u, v;
+	string s;
+
+	while(m--) cin >> u >> v;
 	DSU dsu(n+1);
-	while(m--) {
-		string s; cin >> s;
-		int a, b;
-		if(s == "add") {
-			cin >> a >> b;
-			dsu.add(a, b);
-		} else if(s == "join") {
-			cin >> a >> b;
-			dsu.merge(a, b);
+	vector<pair<string,pair<int,int>>> query;
+	for(int i = 0; i < k; i++) {
+		cin >> s >> u >> v;
+		query.push_back({s, {u, v}});
+	}
+	reverse(all(query));
+	vector<string> ans;
+	for(auto &it : query) {
+		int u,v;
+		u = it.ss.ff, v = it.ss.ss;
+		if(it.first == "cut") {
+			dsu.merge(u , v);
 		} else {
-			cin >> a;
-			cout << dsu.find(a).second << endl;
+			if(dsu.find(u) == dsu.find(v)) {
+				ans.pb("YES");
+			} else {
+				ans.pb("NO");
+			}
 		}
+	}
+	reverse(all(ans));
+	for(auto&it : ans) {
+		cout << it << nline;
 	}
 }
  
